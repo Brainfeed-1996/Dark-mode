@@ -1,0 +1,27 @@
+<button onclick='switchMode()'>Switch Mode</button>
+
+<h1>Clique sur le bouton pour changer de mode</h1>
+
+<style>
+    body{
+         --text-color:black;
+         --backgroung-color:white;
+         background: var(--backgroung-color);
+    }
+    body.dark{
+         --text-color:white;
+         --backgroung-color:black;
+    }
+    body{
+        background: var(--backgroung-color);
+    }
+    h1{
+        color: var(--text-color);
+    }
+</style>
+<script>
+    function switchMode (){
+        const bodyElement = document.body
+        bodyElement.classList.toggle('dark')
+    }
+</script>
