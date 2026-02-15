@@ -1,27 +1,68 @@
-<button onclick='switchMode()'>Switch Mode</button>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dark Mode — demo robuste (persistance + OS)</title>
+  <meta name="description" content="Un exemple dark-mode propre: persistance, préférence système, accessibilité." />
 
-<h1>Clique sur le bouton pour changer de mode</h1>
+  <link rel="stylesheet" href="./assets/style.css" />
 
-<style>
-    body{
-         --text-color:black;
-         --backgroung-color:white;
-         background: var(--backgroung-color);
-    }
-    body.dark{
-         --text-color:white;
-         --backgroung-color:black;
-    }
-    body{
-        background: var(--backgroung-color);
-    }
-    h1{
-        color: var(--text-color);
-    }
-</style>
-<script>
-    function switchMode (){
-        const bodyElement = document.body
-        bodyElement.classList.toggle('dark')
-    }
-</script>
+  <!-- Init theme before paint to avoid flash -->
+  <script>
+    (function(){
+      try {
+        var saved = localStorage.getItem('theme');
+        var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = (saved === 'dark' || saved === 'light') ? saved : (systemDark ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>Dark mode (version "production-grade")</h1>
+      <p>
+        Bouton accessible, persistance via <span class="code">localStorage</span>,
+        fallback sur la préférence OS, et prise en compte des changements système.
+      </p>
+
+      <div class="toolbar">
+        <button id="themeToggle" type="button" aria-pressed="false">Switch theme</button>
+        <span class="tag" id="themeState">Theme: …</span>
+      </div>
+
+      <div class="code" id="debug"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { bindThemeToggle, getActiveTheme, getSavedTheme, getSystemTheme } from './assets/theme.js';
+
+    const btn = document.getElementById('themeToggle');
+    const state = document.getElementById('themeState');
+    const debug = document.getElementById('debug');
+
+    bindThemeToggle({ button: btn });
+
+    const render = () => {
+      const active = getActiveTheme();
+      state.textContent = `Theme: ${active}`;
+      debug.textContent = JSON.stringify({
+        activeTheme: active,
+        savedTheme: getSavedTheme(),
+        systemTheme: getSystemTheme(),
+        htmlDataset: document.documentElement.dataset.theme,
+      }, null, 2);
+    };
+
+    render();
+    window.matchMedia?.('(prefers-color-scheme: dark)')?.addEventListener?.('change', render);
+    window.addEventListener('storage', render);
+    btn.addEventListener('click', render);
+  </script>
+</body>
+</html>
